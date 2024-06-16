@@ -68,6 +68,7 @@ app.MapGet("/ivrig", async () =>
         await retryPolicy.ExecuteAsync(async () =>
         {
             response = await client.GetAsync("https://localhost:44332/dert");
+            return response;
         });
     
         if (!response.IsSuccessStatusCode)

@@ -21,7 +21,7 @@ var returnSuccess = true;
 app.MapGet("/dert", () =>
 {
     returnSuccess = !returnSuccess;
-    return returnSuccess ? Results.Ok("Dette gikk jo vidunderlig") : Results.NotFound();
+    return returnSuccess ? Results.Ok("Dette gikk jo vidunderlig") : Results.Problem();
 })
 .WithOpenApi();
 
