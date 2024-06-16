@@ -1,0 +1,6 @@
+@Endepunkt_HostAddress = http://localhost:5092
+
+GET {{Endepunkt_HostAddress}}/dert/
+Accept: application/json
+
+###
