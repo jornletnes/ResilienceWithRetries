@@ -21,7 +21,7 @@ app.UseHttpsRedirection();
 app.MapGet("/slapp", async () =>
 {
     var client = new HttpClient();
-    var response = await client.GetAsync("https://localhost:44332/dert");
+    var response = await client.GetAsync("http://localhost:5092/dert");
     
     if (!response.IsSuccessStatusCode)
     {
@@ -67,7 +67,7 @@ app.MapGet("/ivrig", async () =>
 
         await retryPolicy.ExecuteAsync(async () =>
         {
-            response = await client.GetAsync("https://localhost:44332/dert");
+            response = await client.GetAsync("http://localhost:5092/dert");
             return response;
         });
     
