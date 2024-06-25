@@ -7,7 +7,7 @@ using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
-const string serviceName = "EndepunktIFS";
+const string serviceName = "EndepunktSesam";
 builder.Logging.AddOpenTelemetry(options => options
     .SetResourceBuilder(
         ResourceBuilder.CreateDefault()
@@ -31,24 +31,29 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
-var returnSuccess = true;
-
-app.MapGet("/dert", () =>
+app.MapGet("/", async () =>
 {
-    using var activitySource = new ActivitySource("Gabbe er en kosegutt");
+    using var activitySource = new ActivitySource(serviceName);
     var activity = activitySource.StartActivity(nameof(Program));
+    activity?.SetTag("ControllerKey", "ControllerValue");
 
-    returnSuccess = !returnSuccess;
-    return returnSuccess ? Results.Ok("Dette gikk jo vidunderlig") : Results.Problem();
+    // Thread.Sleep(new Random().Next(0, 5000));
+
+    var client = new HttpClient();
+    var response = await client.GetAsync("http://localhost:5092/dert");
+    
+    if (!response.IsSuccessStatusCode)
+    {
+        return Results.Problem(response.StatusCode.ToString(), statusCode: (int)response.StatusCode);
+    }
+    
+    var content = await response.Content.ReadAsStringAsync();
+    return Results.Ok(content);
 })
 .WithOpenApi();
 

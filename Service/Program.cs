@@ -1,9 +1,31 @@
+using OpenTelemetry;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Polly;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+const string serviceName = "Service";
+builder.Logging.AddOpenTelemetry(options => options
+    .SetResourceBuilder(
+        ResourceBuilder.CreateDefault()
+            .AddService(serviceName))
+    .AddConsoleExporter());
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource.AddService(serviceName))
+    .WithTracing(tracing => tracing
+        .AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddSource(nameof(Program))
+        .AddSource("Controller")
+        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService(serviceName)))
+    .WithMetrics(metrics => metrics
+        .AddRuntimeInstrumentation()
+        .AddMeter("Microsoft.AspNetCore.Hosting", "Microsoft.AspNetCore.Server.Kestrel", "System.Net.Http"))
+    .UseOtlpExporter();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -34,27 +56,6 @@ app.MapGet("/slapp", async () =>
 .WithOpenApi();
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 app.MapGet("/ivrig", async () =>
     {
         var retryPolicy = Policy
@@ -82,6 +83,19 @@ app.MapGet("/ivrig", async () =>
     .WithOpenApi();
 
 
-
+app.MapGet("/tracete", async () =>
+    {
+        var client = new HttpClient();
+        var response = await client.GetAsync("http://localhost:5219/");
+    
+        if (!response.IsSuccessStatusCode)
+        {
+            return Results.Problem(response.StatusCode.ToString(), statusCode: (int)response.StatusCode);
+        }
+    
+        var content = await response.Content.ReadAsStringAsync();
+        return Results.Ok(content);
+    })
+    .WithOpenApi();
 
 app.Run();
