@@ -42,7 +42,7 @@ app.MapGet("/", async () =>
     var activity = activitySource.StartActivity(nameof(Program));
     activity?.SetTag("ControllerKey", "ControllerValue");
 
-    // Thread.Sleep(new Random().Next(0, 5000));
+    Thread.Sleep(new Random().Next(1000, 3000));
 
     var client = new HttpClient();
     var response = await client.GetAsync("http://localhost:5092/dert");
