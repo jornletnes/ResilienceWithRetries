@@ -7,7 +7,7 @@ using OpenTelemetry.Trace;
 
 var builder = WebApplication.CreateBuilder(args);
 
-const string serviceName = "EndepunktIFS";
+const string serviceName = "DetUltimateEndepunkt";
 builder.Logging.AddOpenTelemetry(options => options
     .SetResourceBuilder(
         ResourceBuilder.CreateDefault()
